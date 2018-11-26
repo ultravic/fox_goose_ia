@@ -39,8 +39,56 @@ int evaluateMovement()
     return 1;
 }
 
-int childNodes(Agnode_t *actual_node)
+int nodeCreate(Agraph_t *graph_map, Agnode_t *node_i, char line_fox, char column_fox, int depth_h)
 {
+	Agnode_t *node;
+	data_t   *data;
+	char move_test[MAXSTR];
+	char *name_node = (char*)malloc(sizeof(char)*10);
+
+	if (depth_h < DEPTH) {
+		if (board[line_fox*10+column_fox+1] == '-') {
+	        sprintf(name_node, "%d%d", line_fox, column_fox+1);
+	        node = agnode(graph_map, name_node, TRUE);
+
+	        data = (data_t*)agbindrec(node, name_node, sizeof(data_t), TRUE);
+	        sprintf(move_test, "r m %d %d %d %d", line_fox, column_fox, line_fox, column_fox+1);
+	        strcpy(data->move, move_test);
+	        data->score = 0;
+	        nodeCreate(graph_map, node, line_fox, column_fox, depth_h+1);
+	    }
+	    if (board[line_fox*10+column_fox-1] == '-') {
+	        sprintf(name_node, "%d%d", line_fox, column_fox-1);
+	        node = agnode(graph_map, name_node, TRUE);
+
+	        data = (data_t*)agbindrec(node, name_node, sizeof(data_t), TRUE);
+	        sprintf(move_test, "r m %d %d %d %d", line_fox, column_fox, line_fox, column_fox-1);
+	        strcpy(data->move, move_test);
+	        data->score = 0;
+	        nodeCreate(graph_map, node, line_fox, column_fox, depth_h+1);
+	    }
+	    if (board[(line_fox+1)*10+column_fox] == '-') {
+	        sprintf(name_node, "%d%d", line_fox+1, column_fox);
+	        node = agnode(graph_map, name_node, TRUE);
+
+	        data = (data_t*)agbindrec(node, name_node, sizeof(data_t), TRUE);
+	        sprintf(move_test, "r m %d %d %d %d", line_fox, column_fox, line_fox+1, column_fox);
+	        strcpy(data->move, move_test);
+	        data->score = 0;
+	        nodeCreate(graph_map, node, line_fox, column_fox, depth_h+1);
+	    }
+	    if (board[(line_fox-1)*10+column_fox-1] == '-') {
+	        sprintf(name_node, "%d%d", line_fox-1, column_fox+1);
+	        node = agnode(graph_map, name_node, TRUE);
+
+	        data = (data_t*)agbindrec(node, name_node, sizeof(data_t), TRUE);
+	        sprintf(move_test, "r m %d %d %d %d", line_fox, column_fox, line_fox-1, column_fox);
+	        strcpy(data->move, move_test);
+	        data->score = 0;
+	        nodeCreate(graph_map, node, line_fox, column_fox, depth_h+1);
+	    }
+	}
+
     return 1;
 }
 
@@ -75,46 +123,7 @@ int treeSearch(char board[MAXSTR], char line_fox, char column_fox)
     strcpy(data->move, move_test);
     data->score = 0;
 
-    if (board[line_fox*10+column_fox+1] == '-') {
-        sprintf(name_node, "%d%d", line_fox, column_fox+1);
-        node = agnode(graph_map, name_node, TRUE);
-
-        data = (data_t*)agbindrec(node, name_node, sizeof(data_t), TRUE);
-        sprintf(move_test, "r m %d %d %d %d", line_fox, column_fox, line_fox, column_fox+1);
-        strcpy(data->move, move_test);
-        data->score = 0;
-        // childNodes(node);
-    }
-    if (board[line_fox*10+column_fox-1] == '-') {
-        sprintf(name_node, "%d%d", line_fox, column_fox-1);
-        node = agnode(graph_map, name_node, TRUE);
-
-        data = (data_t*)agbindrec(node, name_node, sizeof(data_t), TRUE);
-        sprintf(move_test, "r m %d %d %d %d", line_fox, column_fox, line_fox, column_fox-1);
-        strcpy(data->move, move_test);
-        data->score = 0;
-        // childNodes(node);
-    }
-    if (board[(line_fox+1)*10+column_fox] == '-') {
-        sprintf(name_node, "%d%d", line_fox+1, column_fox);
-        node = agnode(graph_map, name_node, TRUE);
-
-        data = (data_t*)agbindrec(node, name_node, sizeof(data_t), TRUE);
-        sprintf(move_test, "r m %d %d %d %d", line_fox, column_fox, line_fox+1, column_fox);
-        strcpy(data->move, move_test);
-        data->score = 0;
-        // childNodes(node);
-    }
-    if (board[(line_fox-1)*10+column_fox-1] == '-') {
-        sprintf(name_node, "%d%d", line_fox-1, column_fox+1);
-        node = agnode(graph_map, name_node, TRUE);
-
-        data = (data_t*)agbindrec(node, name_node, sizeof(data_t), TRUE);
-        sprintf(move_test, "r m %d %d %d %d", line_fox, column_fox, line_fox-1, column_fox);
-        strcpy(data->move, move_test);
-        data->score = 0;
-        // childNodes(node);
-    }
+    nodeCreate(graph_map, node_root, line_fox, column_fox);
 
     // minimax(graph_map, agfstnode(graph_map), 0);
 
