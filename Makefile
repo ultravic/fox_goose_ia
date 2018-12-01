@@ -1,10 +1,10 @@
 # Victor Picussa - GRR20163068
 
-CFLAGS = -O3 - Wno-unused_result
-LDLIBS = -l cgraph -l hiredis -l readline
+CFLAGS = -O3 -Wno-unused-result
+LDLIBS = -l cgraph
 CC = g++
-FILES = src/main.cpp src/movements.cpp src/tabuleiro.c
-HEADERS = hds/movements.h hds/tabuleiro.h
+FILES = src/main.cpp src/movements.cpp
+HEADERS = hds/movements.h
 OUT = fox_goose
 
 all: fox_goose clean
