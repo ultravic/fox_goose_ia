@@ -1,6 +1,7 @@
 // Victor Picussa - GRR20163068
 
-#include "movements.h"
+#include "../hds/movements.h"
+#include "../hds/tabuleiro.h"
 
 //===========================evaluateMovement=================================//
 // Retorna uma valoração para um determinado tabuleiro.                       //
@@ -155,22 +156,22 @@ int printGraph(Agraph_t *graph_map)
 //==============================treeSearch====================================//
 // Função para buscar o melhor movimento a ser reproduzido.                   //
 //============================================================================//
-char* treeSearch(char board[MAXSTR], int line_fox, int column_fox, char players[2])
+char* treeSearch(char board[MAXSTR], char players[2])
 {
 	Agraph_t *graph_map;
 	Agnode_t *node_root, *node;
 	data_t   *data;
 	char move_test[MAXSTR];
-	char *name_node = (char*)malloc(sizeof(char)*10);
+	char *name_node = (char*)malloc(sizeof(char)*100);
 
 	sprintf(name_node, "tree_chance");
 	graph_map = agopen(name_node, Agundirected, NULL);
-	sprintf(name_node, "0%d%d", line_fox, column_fox);
+	sprintf(name_node, "0%d%d", 0, 0);
 	node_root = agnode(graph_map, name_node, TRUE);
 
 	data = (data_t*)agbindrec(node_root, name_node, sizeof(data_t), TRUE);
 	strcpy(data->board, board);
-	sprintf(move_test, "%c m %d %d %d %d", players[0], line_fox, column_fox, line_fox, column_fox);
+	sprintf(move_test, "%c m %d %d %d %d", players[0], 0, 0, 0, 0);
 	strcpy(data->move, move_test);
 	data->score = 0;
 	data->depth = 0;
@@ -184,12 +185,19 @@ char* treeSearch(char board[MAXSTR], int line_fox, int column_fox, char players[
 //============================================================================//
 
 //============================================================================//
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
-	char move[MAXSTR];
+
+	char buf[MAXSTR];
+    char tabuleiro[MAXSTR];
+    char lado_meu;
+    char lado_adv;
+    char tipo_mov_adv;
 	char players[2];
-	int line_fox, column_fox;
-	int qtd_moves;
+    int num_mov_adv;
+    int mov_adv_l[MAXINT];
+    int mov_adv_c[MAXINT];
+    int i;
 
 	// board inicial
 	char board[MAXSTR] =
@@ -203,27 +211,40 @@ int main(int argc, char const *argv[])
 	"#  ---  #\n"
 	"#########\n";
 
-	sprintf(move, "g m 3 4 4 4");
-
-	line_fox = '5' - '0';
-	column_fox = '4' - '0';
-
 	players[0] = *argv[1];
 	if (*argv[1] == 'r')
 		players[1] = 'g';
 	else
 		players[1] = 'r';
 
-	printf("> %s\n", treeSearch(board, line_fox, column_fox, players));
+	// Conecta com controlador
+	tabuleiro_conecta(argc, argv);
 
-	// // Conecta com controlador
-	// tabuleiro_conecta(argc, argv);
-	//
-	// // Recebe o movimento
-	// tabuleiro_recebe(move);
-	//
-	// // Envia movimento
-	// tabuleiro_envia(move);
+	while(1) {
+		tabuleiro_recebe(buf);
+
+		// separa os elementos do string recebido
+	    sscanf(strtok(buf, " \n"), "%c", &lado_meu);
+	    sscanf(strtok(NULL, " \n"), "%c", &lado_adv);
+	    sscanf(strtok(NULL, " \n"), "%c", &tipo_mov_adv);
+	    if(tipo_mov_adv == 'm') {
+	      num_mov_adv = 2;
+	      for(i = 0; i < num_mov_adv; i++) {
+	        sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_l[i]));
+	        sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_c[i]));
+	      }
+	    }
+	    else if(tipo_mov_adv == 's') {
+	      sscanf(strtok(NULL, " \n"), "%d", &num_mov_adv);
+	      for(i = 0; i < num_mov_adv; i++) {
+	        sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_l[i]));
+	        sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_c[i]));
+	      }
+	    }
+	    strncpy(tabuleiro, strtok(NULL, "."), MAXSTR);
+
+	    tabuleiro_envia(treeSearch(board, players));
+	}
 
 	return 0;
 }
