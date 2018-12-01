@@ -6,7 +6,6 @@
 #include <map>
 #include <algorithm>
 #include <iterator>
-#include <string.h>
 #include <graphviz/cgraph.h>
 
 using namespace std;

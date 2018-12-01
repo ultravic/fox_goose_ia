@@ -1,7 +1,7 @@
 // Victor Picussa - GRR20163068
 
 #include "../hds/movements.h"
-// #include "../hds/tabuleiro.h"
+#include "../hds/tabuleiro.h"
 
 //===========================evaluateMovement=================================//
 // Retorna uma valoração para um determinado tabuleiro.                       //
