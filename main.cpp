@@ -1,20 +1,11 @@
 // Victor Picussa - GRR20163068
-#include <iostream>
-#include <vector>
-#include <map>
-#include <algorithm>
-#include <iterator>
-#include <string.h>
-#include <graphviz/cgraph.h>
-// #include "board.h"
-#include "movements.h"
 
-using namespace std;
+#include "movements.h"
 
 //===========================evaluateMovement=================================//
 // Retorna uma valoração para um determinado tabuleiro.                       //
 //============================================================================//
-int evaluateMovement(Agraph_t *graph_map, data_t *data)
+int evaluateMovement(Agraph_t *graph_map, data_t *data char player)
 {
 	Agnode_t *node;
 	data_t   *data_ch;
@@ -58,7 +49,7 @@ int evaluateMovement(Agraph_t *graph_map, data_t *data)
 //===============================minimax======================================//
 // Função para executar o algoritmo minimax sobre a árvore de movimentos.     //
 //============================================================================//
-int minimax(Agraph_t *graph_map, Agnode_t *node_i, int depth_h)
+int minimax(Agraph_t *graph_map, Agnode_t *node_i, char player int depth_h)
 {
 	Agedge_t *edge;
 	data_t   *data;
@@ -70,7 +61,7 @@ int minimax(Agraph_t *graph_map, Agnode_t *node_i, int depth_h)
 
 	data = (data_t*)aggetrec(node_i, agnameof(node_i), TRUE);
 
-	if (!data->score) data->score = evaluateMovement(graph_map, data);
+	if (!data->score) data->score = evaluateMovement(graph_map, data, player);
 
 	int scores = 0;
 	for (edge = agfstedge(graph_map, node_i); edge; edge = agnxtedge(graph_map, edge, node_i)) {
@@ -100,6 +91,7 @@ int printGraph(Agraph_t *graph_map)
 		//printf("> %s - %d - %s\n", data->move, data->depth, agnameof(node_it));
 		printf("%s\n", data->board);
 	}
+	printf("\n");
 
 	return 1;
 }
@@ -118,7 +110,7 @@ int treeSearch(char board[MAXSTR], int line_fox, int column_fox, char players[2]
 
 	sprintf(name_node, "tree_chance");
 	graph_map = agopen(name_node, Agundirected, NULL);
-	sprintf(name_node, "%d%d", line_fox, column_fox);
+	sprintf(name_node, "0%d%d", line_fox, column_fox);
 	node_root = agnode(graph_map, name_node, TRUE);
 
 	data = (data_t*)agbindrec(node_root, name_node, sizeof(data_t), TRUE);
@@ -128,11 +120,11 @@ int treeSearch(char board[MAXSTR], int line_fox, int column_fox, char players[2]
 	data->score = 0;
 	data->depth = 0;
 
-	treeCreate(graph_map, node_root, players, 1);
+	treeCreate(graph_map, node_root, players, 0);
 
-	printGraph(graph_map);
+	// printGraph(graph_map);
 	printf("> %d\n", agnnodes(graph_map));
-	minimax(graph_map, agfstnode(graph_map), 0);
+	printf("Score> %d\n", minimax(graph_map, agfstnode(graph_map), players[0], 0));
 
 	return 1;
 }
@@ -158,7 +150,7 @@ int main(int argc, char const *argv[])
 	"#  ---  #\n"
 	"#########\n";
 
-	sprintf(move, "r m 5 4 5 3");
+	sprintf(move, "g m 3 4 4 4");
 
 	line_fox = '5' - '0';
 	column_fox = '4' - '0';

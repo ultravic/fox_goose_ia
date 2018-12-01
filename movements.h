@@ -9,13 +9,15 @@
 #include <string.h>
 #include <graphviz/cgraph.h>
 
+using namespace std;
+
 //=============================Constantes=====================================//
 // Estrutura para armazenar a cor e peso dos nodos.                           //
 //============================================================================//
 
 #define MAXSTR 512
 #define MAXINT 16
-#define DEPTH  3
+#define DEPTH  5
 #define RADIUS 4
 
 //============================================================================//
