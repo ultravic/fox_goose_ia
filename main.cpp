@@ -5,41 +5,61 @@
 //===========================evaluateMovement=================================//
 // Retorna uma valoração para um determinado tabuleiro.                       //
 //============================================================================//
-int evaluateMovement(Agraph_t *graph_map, data_t *data char player)
+int evaluateMovement(Agraph_t *graph_map, data_t *data, char player)
 {
 	Agnode_t *node;
-	data_t   *data_ch;
-	int result;
+	data_t   *data_fst;
+	int result, gooses_fst, gooses, line, column, fox_l, fox_c;
 
 	node = agfstnode(graph_map);
-	data_ch = (data_t*)agbindrec(node, agnameof(node), sizeof(data_t), TRUE);
+	data_fst = (data_t*)agbindrec(node, agnameof(node), sizeof(data_t), TRUE);
 
 	result = 1;
-	if (!strcmp(data->board, data_ch->board))
-		return -1;
-	if (data->board[data->move[8]*10+data->move[10]+1] == 'g') {
-		if (data->board[data->move[8]*10+data->move[10]+2] == '-')
-			result++;
-		else
-			result--;
-	}
-	if (data->board[data->move[8]*10+data->move[10]-1] == 'g') {
-		if (data->board[data->move[8]*10+data->move[10]-2] == '-')
-			result++;
-		else
-			result--;
-	}
-	if (data->board[(data->move[8]+1)*10+data->move[10]] == 'g') {
-		if (data->board[(data->move[8]+2)*10+data->move[10]] == '-')
-			result++;
-		else
-			result--;
-	}
-	if (data->board[(data->move[8]-1)*10+data->move[10]] == 'g') {
-		if (data->board[(data->move[8]-2)*10+data->move[10]] == '-')
-			result++;
-		else
-			result--;
+	gooses = 0;
+	gooses_fst = 0;
+
+	if (player == 'r') {
+		for (line = 0; line < 9; line++) {
+			for (column = 0; column < 9; column++) {
+				if (data_fst->board[line*10+column] == 'g')
+					gooses_fst++;
+				if (data->board[line*10+column] == 'g')
+					gooses++;
+				if (data->board[line*10+column] == 'r') {
+					fox_l = line;
+					fox_c = column;
+				}
+			}
+		}
+
+		if (data->board[fox_l*10+fox_c+1] == 'g') {
+			if (data->board[fox_l*10+fox_c+2] == '-')
+				result++;
+			else
+				result--;
+		}
+		if (data->board[fox_l*10+fox_c-1] == 'g') {
+			if (data->board[fox_l*10+fox_c-2] == '-')
+				result++;
+			else
+				result--;
+		}
+		if (data->board[(fox_l+1)*10+fox_c] == 'g') {
+			if (data->board[(fox_l+2)*10+fox_c] == '-')
+				result++;
+			else
+				result--;
+		}
+		if (data->board[(fox_l-1)*10+fox_c] == 'g') {
+			if (data->board[(fox_l-2)*10+fox_c] == '-')
+				result++;
+			else
+				result--;
+		}
+
+		if (gooses < gooses_fst) result+=(1+(gooses_fst-gooses));
+	} else {
+		// Goose evaluation
 	}
 
 	return result;
@@ -49,32 +69,67 @@ int evaluateMovement(Agraph_t *graph_map, data_t *data char player)
 //===============================minimax======================================//
 // Função para executar o algoritmo minimax sobre a árvore de movimentos.     //
 //============================================================================//
-int minimax(Agraph_t *graph_map, Agnode_t *node_i, char player int depth_h)
+char* minimax(Agraph_t *graph_map, Agnode_t *node_i, char player, int depth_h)
 {
 	Agedge_t *edge;
-	data_t   *data;
+	data_t   *data, *data_i;
+	char *move_result = (char*)malloc(sizeof(char)*MAXSTR);
 
 	// Faz uma busca em profundidade utilizando recursão
 	for (edge = agfstedge(graph_map, node_i); edge; edge = agnxtedge(graph_map, edge, node_i))
 		if (agnameof(agtail(edge)) == agnameof(node_i))
-			minimax(graph_map, aghead(edge), depth_h+1);
+			minimax(graph_map, aghead(edge), player, depth_h+1);
 
 	data = (data_t*)aggetrec(node_i, agnameof(node_i), TRUE);
 
-	if (!data->score) data->score = evaluateMovement(graph_map, data, player);
+	if (data->depth == DEPTH-1) {
+		data->score = evaluateMovement(graph_map, data, player);
+		return data->move;
+	}
 
-	int scores = 0;
-	for (edge = agfstedge(graph_map, node_i); edge; edge = agnxtedge(graph_map, edge, node_i)) {
+	// printf("> %d\n", data->depth);
+
+	int scores, set;
+	scores = set = 0;
+
+	edge = agfstedge(graph_map, node_i);
+	do {
 		if (agnameof(agtail(edge)) == agnameof(node_i)) {
-			data = (data_t*)aggetrec(aghead(edge), agnameof(aghead(edge)), TRUE);
-			if (!depth_h % 2)
-				if (data->score > scores) scores = data->score;
-			else
-				if (data->score < scores) scores = data->score;
+			data_i = (data_t*)aggetrec(aghead(edge), agnameof(aghead(edge)), TRUE);
+			// printf("%d ", data_i->score);
+			scores = data_i->score;
+			strcpy(move_result, data_i->move);
+			set++;
+		}
+		edge = agnxtedge(graph_map, edge, node_i);
+	} while (!set);
+	if (!(data->depth % 2)) {
+		for (; edge; edge = agnxtedge(graph_map, edge, node_i)) {
+			if (agnameof(agtail(edge)) == agnameof(node_i)) {
+				data_i = (data_t*)aggetrec(aghead(edge), agnameof(aghead(edge)), TRUE);
+				// printf("%d ", data_i->score);
+				if (data_i->score > scores) {
+					scores = data_i->score;
+					strcpy(move_result, data_i->move);
+				}
+			}
+		}
+	} else {
+		for (; edge; edge = agnxtedge(graph_map, edge, node_i)) {
+			if (agnameof(agtail(edge)) == agnameof(node_i)) {
+				data_i = (data_t*)aggetrec(aghead(edge), agnameof(aghead(edge)), TRUE);
+				// printf("%d ", data_i->score);
+				if (data_i->score < scores) {
+					scores = data_i->score;
+					strcpy(move_result, data_i->move);
+				}
+			}
 		}
 	}
 
-	return scores;
+	data->score = scores;
+
+	return move_result;
 }
 //============================================================================//
 
@@ -100,7 +155,7 @@ int printGraph(Agraph_t *graph_map)
 //==============================treeSearch====================================//
 // Função para buscar o melhor movimento a ser reproduzido.                   //
 //============================================================================//
-int treeSearch(char board[MAXSTR], int line_fox, int column_fox, char players[2])
+char* treeSearch(char board[MAXSTR], int line_fox, int column_fox, char players[2])
 {
 	Agraph_t *graph_map;
 	Agnode_t *node_root, *node;
@@ -124,9 +179,7 @@ int treeSearch(char board[MAXSTR], int line_fox, int column_fox, char players[2]
 
 	// printGraph(graph_map);
 	printf("> %d\n", agnnodes(graph_map));
-	printf("Score> %d\n", minimax(graph_map, agfstnode(graph_map), players[0], 0));
-
-	return 1;
+	return (minimax(graph_map, agfstnode(graph_map), players[0], 0));
 }
 //============================================================================//
 
@@ -161,36 +214,7 @@ int main(int argc, char const *argv[])
 	else
 		players[1] = 'r';
 
-	treeSearch(board, line_fox, column_fox, players);
-
-	// while(true) {
-	//     // Recebe movimento e atualiza tabuleiro
-	//     // tabuleiro_recebe(move);
-	//     if (move[0] == 'r') {
-	//         // Raposa
-	//         if (move[2] == 'm') {
-	//             // Mover
-	//             if (board[((move[4] - '0')*10)+(move[6] - '0')] = 'r') {
-	//                 board[((move[4] - '0')*10)+(move[6] - '0')] = '-';
-	//                 board[((move[8] - '0')*10)+(move[10] - '0')] = 'r';
-	//             }
-	//         } else {
-	//             // Salto
-	//         }
-	//     } else {
-	//         // Ganso
-	//         if (move[2] == 'm') {
-	//             // Mover
-	//             if (board[((move[4] - '0')*10)+(move[6] - '0')] == 'g') {
-	//                 board[((move[4] - '0')*10)+(move[6] - '0')] = '-';
-	//                 board[((move[8] - '0')*10)+(move[10] - '0')] = 'g';
-	//             }
-	//         } else {
-	//             // Salto
-	//         }
-	//     }
-	//     treeSearch(board, line_fox, column_fox);
-	// }
+	printf("> %s\n", treeSearch(board, line_fox, column_fox, players));
 
 	// // Conecta com controlador
 	// tabuleiro_conecta(argc, argv);

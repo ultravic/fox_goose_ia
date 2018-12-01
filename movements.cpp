@@ -16,8 +16,17 @@ Agnode_t* createNodeEdge(Agraph_t *graph_map, Agnode_t *node_i, data_t *data_i, 
 
     strcpy(data->board, data_i->board);
 
-    data->board[(data->move[8]-'0')*10+data->move[10]-'0'] = player;
-    data->board[(line)*10+column] = '-';
+    if (data->move[2] == 'm') {
+        data->board[(data->move[8]-'0')*10+data->move[10]-'0'] = player;
+        data->board[(line)*10+column] = '-';
+    } else {
+        data->board[(data->move[8]-'0')*10+data->move[10]-'0'] = player;
+        data->board[(line)*10+column] = '-';
+        if ((line - (data->move[8]-'0')) < 0) data->board[(line+1)*10+column] = '-';
+        else if ((line - (data->move[8]-'0')) > 0) data->board[(line-1)*10+column] = '-';
+        else if ((column - (data->move[10]-'0')) < 0) data->board[line*10+column+1] = '-';
+        else if ((column - (data->move[10]-'0')) > 0) data->board[line*10+column-1] = '-';
+    }
 
     strcat(name_node, agnameof(node_i));
     agedge(graph_map, node_i, node, name_node, TRUE);
@@ -31,7 +40,7 @@ void childCreate(Agraph_t *graph_map, Agnode_t *node_i, char players[2], int dep
     data_t   *data, *data_i;
     char move_test[MAXSTR], player;
     int pos, line, column;
-    char *name_node = (char*)malloc(sizeof(char)*10);
+    char *name_node = (char*)malloc(sizeof(char)*50);
 
     data_i = (data_t*)agbindrec(node_i, agnameof(node_i), sizeof(data_t), TRUE);
 
@@ -71,6 +80,38 @@ void childCreate(Agraph_t *graph_map, Agnode_t *node_i, char players[2], int dep
             node = createNodeEdge(graph_map, node_i, data_i, 'r', move_test, name_node, line, column, depth_h);
             treeCreate(graph_map, node, players, depth_h);
         }
+        if (data_i->board[(line)*10+(column)+1] == 'g') {
+			if (data_i->board[(line)*10+(column)+2] == '-') {
+                sprintf(name_node, "%d%s%d%d", depth_h, agnameof(node_i), line, (column)+2);
+                sprintf(move_test, "%c s %d %d %d %d", 'r', line, column, line, (column)+2);
+                node = createNodeEdge(graph_map, node_i, data_i, 'r', move_test, name_node, line, column, depth_h);
+                treeCreate(graph_map, node, players, depth_h);
+            }
+		}
+		if (data_i->board[(line)*10+(column)-1] == 'g') {
+			if (data_i->board[(line)*10+(column)-2] == '-') {
+                sprintf(name_node, "%d%s%d%d", depth_h, agnameof(node_i), line, (column)-2);
+                sprintf(move_test, "%c s %d %d %d %d", 'r', line, column, line, (column)-2);
+                node = createNodeEdge(graph_map, node_i, data_i, 'r', move_test, name_node, line, column, depth_h);
+                treeCreate(graph_map, node, players, depth_h);
+            }
+		}
+		if (data_i->board[((line)+1)*10+(column)] == 'g') {
+			if (data_i->board[((line)+2)*10+(column)] == '-') {
+                sprintf(name_node, "%d%s%d%d", depth_h, agnameof(node_i), (line)+2, column);
+                sprintf(move_test, "%c s %d %d %d %d", 'r', line, column, (line)+2, column);
+                node = createNodeEdge(graph_map, node_i, data_i, 'r', move_test, name_node, line, column, depth_h);
+                treeCreate(graph_map, node, players, depth_h);
+            }
+		}
+		if (data_i->board[((line)-1)*10+(column)] == 'g') {
+			if (data_i->board[((line)-2)*10+(column)] == '-') {
+                sprintf(name_node, "%d%s%d%d", depth_h, agnameof(node_i), (line)-2, column);
+                sprintf(move_test, "%c s %d %d %d %d", 'r', line, column, (line)-2, column);
+                node = createNodeEdge(graph_map, node_i, data_i, 'r', move_test, name_node, line, column, depth_h);
+                treeCreate(graph_map, node, players, depth_h);
+            }
+		}
     } else {
         for (line = 0; line < 9; line++) {
             for (column = 0; column < 9; column++) {
