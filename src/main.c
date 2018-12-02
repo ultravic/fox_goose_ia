@@ -63,7 +63,7 @@ int evaluateMovement(Agraph_t *graph_map, data_t *data, char player)
 		(data->board[(fox_l-1)*10+fox_c] == '-'))
 		result--;
 
-		if (gooses < gooses_fst) result+=(1+(gooses_fst-gooses));
+		if (gooses < gooses_fst) result+=(2+(gooses_fst-gooses));
 	} else {
 		// Goose evaluation
 		if ((data->board[(data->move[8]-'0')*10+(data->move[10]-'0')+1] == '-') &&
@@ -82,12 +82,12 @@ int evaluateMovement(Agraph_t *graph_map, data_t *data, char player)
 			result--;
 			else
 			result++;
-		} else if (data->board[((data->move[8]-'0')+1)*10+(data->move[10]-'0')] == 'r')
+		} else if (data->board[((data->move[8]-'0')+1)*10+(data->move[10]-'0')] == 'r') {
 		if (data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == '-')
 		result--;
 		else
 		result++;
-	} else if (data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == 'r')
+	} else if (data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == 'r') {
 	if (data->board[((data->move[8]-'0')+1)*10+(data->move[10]-'0')] == '-')
 	result--;
 	else
@@ -192,8 +192,9 @@ char* treeSearch(char board[MAXSTR], char players[2])
 {
 	Agraph_t *graph_map;
 	Agnode_t *node_root, *node;
-	data_t   *data;
-	char move_test[MAXSTR];
+	Agedge_t *edge;
+	data_t   *data, *data_i;
+	char *move_test = (char*)malloc(sizeof(char)*MAXSTR);
 	char *name_node = (char*)malloc(sizeof(char)*100);
 
 	sprintf(name_node, "tree_chance");
@@ -212,13 +213,18 @@ char* treeSearch(char board[MAXSTR], char players[2])
 
 	// printGraph(graph_map);
 	// printf("> %d\n", agnnodes(graph_map));
-	strcpy(move_test, minimax(graph_map, agfstnode(graph_map), players[0], 0)));
+	strcpy(move_test, minimax(graph_map, agfstnode(graph_map), players[0], 0));
 
+	srand(time(NULL));	
 	for (edge = agfstedge(graph_map, node_root); edge; edge = agnxtedge(graph_map, edge, node_root)) {
 		if (agnameof(agtail(edge)) == agnameof(node_root)) {
 			data_i = (data_t*)aggetrec(aghead(edge), agnameof(aghead(edge)), TRUE);
-			if (data_i->score == data->score && (rand() % 2))
-			strcpy(move_test, data_i->move);
+			if (data_i->score == data->score) {
+				if (players[0] == 'r' && ((rand() % 100) >= 65))
+					strcpy(move_test, data_i->move);
+				else if (players[0] == 'g' && ((rand() % 100) <= 35))
+					strcpy(move_test, data_i->move);
+			}
 		}
 	}
 

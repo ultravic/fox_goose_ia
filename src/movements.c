@@ -40,7 +40,7 @@ void childCreate(Agraph_t *graph_map, Agnode_t *node_i, char players[2], int dep
     data_t   *data, *data_i;
     char move_test[MAXSTR], player;
     int pos, line, column;
-    char *name_node = (char*)malloc(sizeof(char)*50);
+    char *name_node = (char*)malloc(sizeof(char)*150);
 
     data_i = (data_t*)agbindrec(node_i, agnameof(node_i), sizeof(data_t), TRUE);
 
