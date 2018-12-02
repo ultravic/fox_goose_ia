@@ -12,7 +12,7 @@
 
 #define MAXSTR 512
 #define MAXINT 16
-#define DEPTH  8
+#define DEPTH  6
 #define RADIUS 4
 
 //============================================================================//

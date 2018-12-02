@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
     int mov_adv_l[MAXINT];
     int mov_adv_c[MAXINT];
     int i;
-
+	char *move = (char*)malloc(sizeof(char)*100);
 	// board inicial
 	char board[MAXSTR] =
 	"#########\n"
@@ -216,34 +216,40 @@ int main(int argc, char *argv[])
 	else
 		players[1] = 'r';
 
-	// // Conecta com controlador
-	// tabuleiro_conecta(argc, argv);
-	//
-	// while(1) {
-	// 	tabuleiro_recebe(buf);
-	//
-	// 	// separa os elementos do string recebido
-	//     sscanf(strtok(buf, " \n"), "%c", &lado_meu);
-	//     sscanf(strtok(NULL, " \n"), "%c", &lado_adv);
-	//     sscanf(strtok(NULL, " \n"), "%c", &tipo_mov_adv);
-	//     if(tipo_mov_adv == 'm') {
-	//       num_mov_adv = 2;
-	//       for(i = 0; i < num_mov_adv; i++) {
-	//         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_l[i]));
-	//         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_c[i]));
-	//       }
-	//     }
-	//     else if(tipo_mov_adv == 's') {
-	//       sscanf(strtok(NULL, " \n"), "%d", &num_mov_adv);
-	//       for(i = 0; i < num_mov_adv; i++) {
-	//         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_l[i]));
-	//         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_c[i]));
-	//       }
-	//     }
-	//     strncpy(tabuleiro, strtok(NULL, "."), MAXSTR);
-	//
-	//     tabuleiro_envia(treeSearch(board, players));
-	// }
+	 // Conecta com controlador
+	 tabuleiro_conecta(argc, argv);
+	
+	 while(1) {
+ 	     tabuleiro_recebe(buf);
+	
+	 	// separa os elementos do string recebido
+	     sscanf(strtok(buf, " \n"), "%c", &lado_meu);
+	     sscanf(strtok(NULL, " \n"), "%c", &lado_adv);
+	     sscanf(strtok(NULL, " \n"), "%c", &tipo_mov_adv);
+	     if(tipo_mov_adv == 'm') {
+	       num_mov_adv = 2;
+	       for(i = 0; i < num_mov_adv; i++) {
+	         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_l[i]));
+	         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_c[i]));
+	       }
+	     }
+	     else if(tipo_mov_adv == 's') {
+	       sscanf(strtok(NULL, " \n"), "%d", &num_mov_adv);
+	       for(i = 0; i < num_mov_adv; i++) {
+	         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_l[i]));
+	         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_c[i]));
+	       }
+	     }
+	     strncpy(tabuleiro, strtok(NULL, "."), MAXSTR);
+	     strcpy(board, tabuleiro);
+
+	     printf("%s\n", board);
+
+		strcpy(move, treeSearch(board, players));
+	
+		printf("%s\n", move);
+	     tabuleiro_envia(move);
+	 }
 
 	return 0;
 }
