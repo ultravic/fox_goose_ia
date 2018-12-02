@@ -23,9 +23,9 @@ int evaluateMovement(Agraph_t *graph_map, data_t *data, char player)
 		for (line = 0; line < 9; line++) {
 			for (column = 0; column < 9; column++) {
 				if (data_fst->board[line*10+column] == 'g')
-					gooses_fst++;
+				gooses_fst++;
 				if (data->board[line*10+column] == 'g')
-					gooses++;
+				gooses++;
 				if (data->board[line*10+column] == 'r') {
 					fox_l = line;
 					fox_c = column;
@@ -35,35 +35,67 @@ int evaluateMovement(Agraph_t *graph_map, data_t *data, char player)
 
 		if (data->board[fox_l*10+fox_c+1] == 'g') {
 			if (data->board[fox_l*10+fox_c+2] == '-')
-				result++;
+			result++;
 			else
-				result--;
+			result--;
 		}
 		if (data->board[fox_l*10+fox_c-1] == 'g') {
 			if (data->board[fox_l*10+fox_c-2] == '-')
-				result++;
+			result++;
 			else
-				result--;
+			result--;
 		}
 		if (data->board[(fox_l+1)*10+fox_c] == 'g') {
 			if (data->board[(fox_l+2)*10+fox_c] == '-')
-				result++;
+			result++;
 			else
-				result--;
+			result--;
 		}
 		if (data->board[(fox_l-1)*10+fox_c] == 'g') {
 			if (data->board[(fox_l-2)*10+fox_c] == '-')
-				result++;
+			result++;
 			else
-				result--;
+			result--;
 		}
+		if ((data->board[fox_l*10+fox_c+1] == '-') &&
+		(data->board[fox_l*10+fox_c-1] == '-') &&
+		(data->board[(fox_l+1)*10+fox_c] == '-') &&
+		(data->board[(fox_l-1)*10+fox_c] == '-'))
+		result--;
 
 		if (gooses < gooses_fst) result+=(1+(gooses_fst-gooses));
 	} else {
 		// Goose evaluation
-	}
+		if ((data->board[(data->move[8]-'0')*10+(data->move[10]-'0')+1] == '-') &&
+		(data->board[(data->move[8]-'0')*10+(data->move[10]-'0')-1] == '-') &&
+		(data->board[((data->move[8]-'0')+1)*10+(data->move[10]-'0')] == '-') &&
+		(data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == '-'))
+		result--;
 
-	return result;
+		if (data->board[(data->move[8]-'0')*10+(data->move[10]-'0')+1] == 'r') {
+			if (data->board[(data->move[8]-'0')*10+(data->move[10]-'0')-1] == '-')
+			result--;
+			else
+			result++;
+		} else if (data->board[(data->move[8]-'0')*10+(data->move[10]-'0')-1] == 'r') {
+			if (data->board[(data->move[8]-'0')*10+(data->move[10]-'0')+1] == '-')
+			result--;
+			else
+			result++;
+		} else if (data->board[((data->move[8]-'0')+1)*10+(data->move[10]-'0')] == 'r')
+		if (data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == '-')
+		result--;
+		else
+		result++;
+	} else if (data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == 'r')
+	if (data->board[((data->move[8]-'0')+1)*10+(data->move[10]-'0')] == '-')
+	result--;
+	else
+	result++;
+}
+}
+
+return result;
 }
 //============================================================================//
 
@@ -78,8 +110,8 @@ char* minimax(Agraph_t *graph_map, Agnode_t *node_i, char player, int depth_h)
 
 	// Faz uma busca em profundidade utilizando recursão
 	for (edge = agfstedge(graph_map, node_i); edge; edge = agnxtedge(graph_map, edge, node_i))
-		if (agnameof(agtail(edge)) == agnameof(node_i))
-			minimax(graph_map, aghead(edge), player, depth_h+1);
+	if (agnameof(agtail(edge)) == agnameof(node_i))
+	minimax(graph_map, aghead(edge), player, depth_h+1);
 
 	data = (data_t*)aggetrec(node_i, agnameof(node_i), TRUE);
 
@@ -186,7 +218,7 @@ char* treeSearch(char board[MAXSTR], char players[2])
 		if (agnameof(agtail(edge)) == agnameof(node_root)) {
 			data_i = (data_t*)aggetrec(aghead(edge), agnameof(aghead(edge)), TRUE);
 			if (data_i->score == data->score && (rand() % 2))
-				strcpy(move_test, data_i->move);
+			strcpy(move_test, data_i->move);
 		}
 	}
 
@@ -198,68 +230,56 @@ char* treeSearch(char board[MAXSTR], char players[2])
 int main(int argc, char *argv[])
 {
 	char buf[MAXSTR];
-    char tabuleiro[MAXSTR];
-    char lado_meu;
-    char lado_adv;
-    char tipo_mov_adv;
+	char tabuleiro[MAXSTR];
+	char lado_meu;
+	char lado_adv;
+	char tipo_mov_adv;
 	char players[2];
-    int num_mov_adv;
-    int mov_adv_l[MAXINT];
-    int mov_adv_c[MAXINT];
-    int i;
+	int num_mov_adv;
+	int mov_adv_l[MAXINT];
+	int mov_adv_c[MAXINT];
+	int i;
 	char *move = (char*)malloc(sizeof(char)*100);
-	// board inicial
-	char board[MAXSTR] =
-	"#########\n"
-	"#  ggg  #\n"
-	"#  ggg  #\n"
-	"#ggggggg#\n"
-	"#-------#\n"
-	"#---r---#\n"
-	"#  ---  #\n"
-	"#  ---  #\n"
-	"#########\n";
 
 	players[0] = *argv[1];
 	if (*argv[1] == 'r')
-		players[1] = 'g';
+	players[1] = 'g';
 	else
-		players[1] = 'r';
+	players[1] = 'r';
 
-	 // Conecta com controlador
-	 tabuleiro_conecta(argc, argv);
+	// Conecta com controlador
+	tabuleiro_conecta(argc, argv);
 
-	 while(1) {
- 	     tabuleiro_recebe(buf);
+	while(1) {
+		tabuleiro_recebe(buf);
 
-	 	// separa os elementos do string recebido
-	     sscanf(strtok(buf, " \n"), "%c", &lado_meu);
-	     sscanf(strtok(NULL, " \n"), "%c", &lado_adv);
-	     sscanf(strtok(NULL, " \n"), "%c", &tipo_mov_adv);
-	     if(tipo_mov_adv == 'm') {
-	       num_mov_adv = 2;
-	       for(i = 0; i < num_mov_adv; i++) {
-	         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_l[i]));
-	         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_c[i]));
-	       }
-	     }
-	     else if(tipo_mov_adv == 's') {
-	       sscanf(strtok(NULL, " \n"), "%d", &num_mov_adv);
-	       for(i = 0; i < num_mov_adv; i++) {
-	         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_l[i]));
-	         sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_c[i]));
-	       }
-	     }
-	     strncpy(tabuleiro, strtok(NULL, "."), MAXSTR);
-	     strcpy(board, tabuleiro);
+		// separa os elementos do string recebido
+		sscanf(strtok(buf, " \n"), "%c", &lado_meu);
+		sscanf(strtok(NULL, " \n"), "%c", &lado_adv);
+		sscanf(strtok(NULL, " \n"), "%c", &tipo_mov_adv);
+		if(tipo_mov_adv == 'm') {
+			num_mov_adv = 2;
+			for(i = 0; i < num_mov_adv; i++) {
+				sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_l[i]));
+				sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_c[i]));
+			}
+		}
+		else if(tipo_mov_adv == 's') {
+			sscanf(strtok(NULL, " \n"), "%d", &num_mov_adv);
+			for(i = 0; i < num_mov_adv; i++) {
+				sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_l[i]));
+				sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_c[i]));
+			}
+		}
+		strncpy(tabuleiro, strtok(NULL, "."), MAXSTR);
 
-	     printf("%s\n", board);
+		printf("%s\n", tabuleiro);
 
-		strcpy(move, treeSearch(board, players));
+		strcpy(move, treeSearch(tabuleiro, players));
 
 		printf("%s\n", move);
-	     tabuleiro_envia(move);
-	 }
+		tabuleiro_envia(move);
+	}
 
 	return 0;
 }
