@@ -179,8 +179,18 @@ char* treeSearch(char board[MAXSTR], char players[2])
 	treeCreate(graph_map, node_root, players, 0);
 
 	// printGraph(graph_map);
-	printf("> %d\n", agnnodes(graph_map));
-	return (minimax(graph_map, agfstnode(graph_map), players[0], 0));
+	// printf("> %d\n", agnnodes(graph_map));
+	strcpy(move_test, minimax(graph_map, agfstnode(graph_map), players[0], 0)));
+
+	for (edge = agfstedge(graph_map, node_root); edge; edge = agnxtedge(graph_map, edge, node_root)) {
+		if (agnameof(agtail(edge)) == agnameof(node_root)) {
+			data_i = (data_t*)aggetrec(aghead(edge), agnameof(aghead(edge)), TRUE);
+			if (data_i->score == data->score && (rand() % 2))
+				strcpy(move_test, data_i->move);
+		}
+	}
+
+	return move_test;
 }
 //============================================================================//
 
@@ -218,10 +228,10 @@ int main(int argc, char *argv[])
 
 	 // Conecta com controlador
 	 tabuleiro_conecta(argc, argv);
-	
+
 	 while(1) {
  	     tabuleiro_recebe(buf);
-	
+
 	 	// separa os elementos do string recebido
 	     sscanf(strtok(buf, " \n"), "%c", &lado_meu);
 	     sscanf(strtok(NULL, " \n"), "%c", &lado_adv);
@@ -246,7 +256,7 @@ int main(int argc, char *argv[])
 	     printf("%s\n", board);
 
 		strcpy(move, treeSearch(board, players));
-	
+
 		printf("%s\n", move);
 	     tabuleiro_envia(move);
 	 }
