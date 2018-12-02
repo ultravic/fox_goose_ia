@@ -3,8 +3,8 @@
 CFLAGS = -O3 -Wno-unused-result
 LDLIBS = -l cgraph -l hiredis -l readline
 CC = gcc
-FILES = src/main.c src/movements.c src/tabuleiro.c
-HEADERS = hds/movements.h hds/tabuleiro.h
+FILES = src/fox_goose.c src/movements.c src/tabuleiro.c
+HEADERS = hds/fox_goose.h hds/tabuleiro.h
 OUT = fox_goose
 
 all: fox_goose clean

@@ -1,3 +1,5 @@
+// Victor Picussa - GRR20163068
+
 #ifndef __MOVEMENTS__
 #define __MOVEMENTS__
 
@@ -8,7 +10,7 @@
 #include <graphviz/cgraph.h>
 
 //=============================Constantes=====================================//
-// Estrutura para armazenar a cor e peso dos nodos.                           //
+// Constantes do algoritmo.                                                   //
 //============================================================================//
 
 #define MAXSTR 512
@@ -19,7 +21,7 @@
 //============================================================================//
 
 //=============================Estruturas=====================================//
-// Estrutura para armazenar a cor e peso dos nodos.                           //
+// Estrutura para armazenar os movimentos, pontuação, profundidade e tabuleiro//
 //============================================================================//
 
 typedef struct {

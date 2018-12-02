@@ -1,6 +1,11 @@
+// Victor Picussa - GRR20163068
 
-#include "../hds/movements.h"
+#include "../hds/fox_goose.h"
 
+//============================createNodeEdge==================================//
+// Cria um novo node com o tabuleiro e o movimento, como também a ligação com //
+// o nodo pai.                                                                //
+//============================================================================//
 Agnode_t* createNodeEdge(Agraph_t *graph_map, Agnode_t *node_i, data_t *data_i, char player,
                             char *move_test, char *name_node, int line, int column, int depth_h)
 {
@@ -16,6 +21,7 @@ Agnode_t* createNodeEdge(Agraph_t *graph_map, Agnode_t *node_i, data_t *data_i, 
 
     strcpy(data->board, data_i->board);
 
+    // Modifica o tabuleiro do novo nodo
     if (data->move[2] == 'm') {
         data->board[(data->move[8]-'0')*10+data->move[10]-'0'] = player;
         data->board[(line)*10+column] = '-';
@@ -28,12 +34,18 @@ Agnode_t* createNodeEdge(Agraph_t *graph_map, Agnode_t *node_i, data_t *data_i, 
         else if ((column - (data->move[12]-'0')) > 0) data->board[line*10+column-1] = '-';
     }
 
+    // Cria aresta
     strcat(name_node, agnameof(node_i));
     agedge(graph_map, node_i, node, name_node, TRUE);
 
     return node;
 }
+//============================================================================//
 
+//==============================childCreate===================================//
+// Faz a verificação de jogadas e cria nodos conforme os testes verificados   //
+// positivamente.                                                                //
+//============================================================================//
 void childCreate(Agraph_t *graph_map, Agnode_t *node_i, char players[2], int depth_h)
 {
     Agnode_t *node;
@@ -45,6 +57,7 @@ void childCreate(Agraph_t *graph_map, Agnode_t *node_i, char players[2], int dep
     data_i = (data_t*)agbindrec(node_i, agnameof(node_i), sizeof(data_t), TRUE);
 
     pos = 0;
+    // Busca posição da raposa
     for (line = 0; line < 9; line++) {
         for (column = 0; column < 9; column++) {
             if (data_i->board[line*10+column] == 'r') {
@@ -56,6 +69,7 @@ void childCreate(Agraph_t *graph_map, Agnode_t *node_i, char players[2], int dep
     }
 
     if (((depth_h % 2) && players[0] == 'r') || (!(depth_h % 2) && players[1] == 'r')) {
+        // Testes de movimento para raposa
         if (data_i->board[(line)*10+(column)+1] == '-') {
             sprintf(name_node, "%d%s%d%d", depth_h, agnameof(node_i), line, (column)+1);
             sprintf(move_test, "%c m %d %d %d %d", 'r', line, column, line, (column)+1);
@@ -113,6 +127,7 @@ void childCreate(Agraph_t *graph_map, Agnode_t *node_i, char players[2], int dep
             }
 		}
     } else {
+        // Teste de movimento para os gansos
         for (line = 0; line < 9; line++) {
             for (column = 0; column < 9; column++) {
                 if (data_i->board[line*10+column] == 'g') {
@@ -145,6 +160,8 @@ void childCreate(Agraph_t *graph_map, Agnode_t *node_i, char players[2], int dep
         }
     }
 }
+//============================================================================//
+
 
 //=============================treeCreate=====================================//
 // Cria a árvore de jogadas utilizando recursão.                              //

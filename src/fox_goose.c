@@ -1,6 +1,6 @@
 // Victor Picussa - GRR20163068
 
-#include "../hds/movements.h"
+#include "../hds/fox_goose.h"
 #include "../hds/tabuleiro.h"
 
 //===========================evaluateMovement=================================//
@@ -20,6 +20,7 @@ int evaluateMovement(Agraph_t *graph_map, data_t *data, char player)
 	gooses_fst = 0;
 
 	if (player == 'r') {
+		// Valoração da raposa
 		for (line = 0; line < 9; line++) {
 			for (column = 0; column < 9; column++) {
 				if (data_fst->board[line*10+column] == 'g')
@@ -65,35 +66,35 @@ int evaluateMovement(Agraph_t *graph_map, data_t *data, char player)
 
 		if (gooses < gooses_fst) result+=(2+(gooses_fst-gooses));
 	} else {
-		// Goose evaluation
+		// Valoração dos gansos
 		if ((data->board[(data->move[8]-'0')*10+(data->move[10]-'0')+1] == '-') &&
-		(data->board[(data->move[8]-'0')*10+(data->move[10]-'0')-1] == '-') &&
-		(data->board[((data->move[8]-'0')+1)*10+(data->move[10]-'0')] == '-') &&
-		(data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == '-'))
-		result--;
+			(data->board[(data->move[8]-'0')*10+(data->move[10]-'0')-1] == '-') &&
+			(data->board[((data->move[8]-'0')+1)*10+(data->move[10]-'0')] == '-') &&
+			(data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == '-'))
+			result--;
 
 		if (data->board[(data->move[8]-'0')*10+(data->move[10]-'0')+1] == 'r') {
 			if (data->board[(data->move[8]-'0')*10+(data->move[10]-'0')-1] == '-')
-			result--;
+				result--;
 			else
-			result++;
+				result++;
 		} else if (data->board[(data->move[8]-'0')*10+(data->move[10]-'0')-1] == 'r') {
 			if (data->board[(data->move[8]-'0')*10+(data->move[10]-'0')+1] == '-')
-			result--;
+				result--;
 			else
-			result++;
+				result++;
 		} else if (data->board[((data->move[8]-'0')+1)*10+(data->move[10]-'0')] == 'r') {
-		if (data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == '-')
-		result--;
-		else
-		result++;
-	} else if (data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == 'r') {
-	if (data->board[((data->move[8]-'0')+1)*10+(data->move[10]-'0')] == '-')
-	result--;
-	else
-	result++;
-}
-}
+			if (data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == '-')
+				result--;
+			else
+				result++;
+		} else if (data->board[((data->move[8]-'0')-1)*10+(data->move[10]-'0')] == 'r') {
+			if (data->board[((data->move[8]-'0')+1)*10+(data->move[10]-'0')] == '-')
+				result--;
+			else
+				result++;
+			}
+	}
 
 return result;
 }
@@ -110,17 +111,16 @@ char* minimax(Agraph_t *graph_map, Agnode_t *node_i, char player, int depth_h)
 
 	// Faz uma busca em profundidade utilizando recursão
 	for (edge = agfstedge(graph_map, node_i); edge; edge = agnxtedge(graph_map, edge, node_i))
-	if (agnameof(agtail(edge)) == agnameof(node_i))
-	minimax(graph_map, aghead(edge), player, depth_h+1);
+		if (agnameof(agtail(edge)) == agnameof(node_i))
+			minimax(graph_map, aghead(edge), player, depth_h+1);
 
 	data = (data_t*)aggetrec(node_i, agnameof(node_i), TRUE);
 
+	// Se é nodo folha faz o teste de valoração
 	if (data->depth == DEPTH-1) {
 		data->score = evaluateMovement(graph_map, data, player);
 		return data->move;
 	}
-
-	// printf("> %d\n", data->depth);
 
 	int scores, set;
 	scores = set = 0;
@@ -129,7 +129,6 @@ char* minimax(Agraph_t *graph_map, Agnode_t *node_i, char player, int depth_h)
 	do {
 		if (agnameof(agtail(edge)) == agnameof(node_i)) {
 			data_i = (data_t*)aggetrec(aghead(edge), agnameof(aghead(edge)), TRUE);
-			// printf("%d ", data_i->score);
 			scores = data_i->score;
 			strcpy(move_result, data_i->move);
 			set++;
@@ -137,10 +136,10 @@ char* minimax(Agraph_t *graph_map, Agnode_t *node_i, char player, int depth_h)
 		edge = agnxtedge(graph_map, edge, node_i);
 	} while (!set);
 	if (!(data->depth % 2)) {
+		// Faz o teste de máximo
 		for (; edge; edge = agnxtedge(graph_map, edge, node_i)) {
 			if (agnameof(agtail(edge)) == agnameof(node_i)) {
 				data_i = (data_t*)aggetrec(aghead(edge), agnameof(aghead(edge)), TRUE);
-				// printf("%d ", data_i->score);
 				if (data_i->score > scores) {
 					scores = data_i->score;
 					strcpy(move_result, data_i->move);
@@ -148,10 +147,10 @@ char* minimax(Agraph_t *graph_map, Agnode_t *node_i, char player, int depth_h)
 			}
 		}
 	} else {
+		// Faz o teste de mínimo
 		for (; edge; edge = agnxtedge(graph_map, edge, node_i)) {
 			if (agnameof(agtail(edge)) == agnameof(node_i)) {
 				data_i = (data_t*)aggetrec(aghead(edge), agnameof(aghead(edge)), TRUE);
-				// printf("%d ", data_i->score);
 				if (data_i->score < scores) {
 					scores = data_i->score;
 					strcpy(move_result, data_i->move);
@@ -176,7 +175,6 @@ int printGraph(Agraph_t *graph_map)
 
 	for (node_it = agfstnode(graph_map); node_it; node_it = agnxtnode(graph_map, node_it)) {
 		data = (data_t*)aggetrec(node_it, agnameof(node_it), TRUE);
-		//printf("> %s - %d - %s\n", data->move, data->depth, agnameof(node_it));
 		printf("%s\n", data->board);
 	}
 	printf("\n");
@@ -197,6 +195,7 @@ char* treeSearch(char board[MAXSTR], char players[2])
 	char *move_test = (char*)malloc(sizeof(char)*MAXSTR);
 	char *name_node = (char*)malloc(sizeof(char)*100);
 
+	// Cria o grafo e o nodo raiz
 	sprintf(name_node, "tree_chance");
 	graph_map = agopen(name_node, Agundirected, NULL);
 	sprintf(name_node, "0%d%d", 0, 0);
@@ -211,11 +210,10 @@ char* treeSearch(char board[MAXSTR], char players[2])
 
 	treeCreate(graph_map, node_root, players, 0);
 
-	// printGraph(graph_map);
-	// printf("> %d\n", agnnodes(graph_map));
 	strcpy(move_test, minimax(graph_map, agfstnode(graph_map), players[0], 0));
 
-	srand(time(NULL));	
+	srand(time(NULL));
+	// Randomicamente escolhe um movimento de mesmo custo
 	for (edge = agfstedge(graph_map, node_root); edge; edge = agnxtedge(graph_map, edge, node_root)) {
 		if (agnameof(agtail(edge)) == agnameof(node_root)) {
 			data_i = (data_t*)aggetrec(aghead(edge), agnameof(aghead(edge)), TRUE);

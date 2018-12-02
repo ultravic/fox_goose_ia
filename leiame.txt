@@ -1,0 +1,26 @@
+
++ Execução:
+    - Para compilar basta "make". A compilação gerará o arquivo executável "fox_goose".
+    - Para executar, basta "./fox_goose [r|g]".
+    - Para o código rodar é necessário um servidor redis, um controlador e dois
+    jogadores. Dessa forma, com o servidor e controlador executados, basta rodar
+    "./fox_goose r" e "./fox_goose g" para testar uma instância de jogo.
+
++ Funcionamento:
+    - O jogador X receberá o tabuleiro atual, sobre o qual irá promover uma jogada.
+    Consequentemente, é chamado a função "treeSearch" que irá buscar o movimento.
+    Essa função cria o grafo e o nodo raiz e, em sequência, chama a função de criar
+    a árvore "treeCreate", do arquivo "movements.c". A função irá chamar "childCreate",
+    onde os testes de movimento são feitos e novos nodos são criados com os possíveis
+    movimentos. A execução é feita recursivamente. Com a árvore criada, "treeSearch"
+    chama a função "minimax" que irá buscar o melhor movimento. Recursivamente, a
+    função chega à folha e, caso não possua uma valoração, "evaluateMovement" fará
+    os testes e retornará um valor. Com isso, é feito os teste de máximo e mínimo
+    dependendo da profundidade, retornando o melhor movimento. No fim, "treeSearch"
+    faz uma busca nos filhos da raiz, trocando o melhor movimento de forma aleatória,
+    caso o movimento sendo verificado tenha a mesma valoração da raiz e passe no teste.
+
++ Observações:
+    - Caso não possua a biblioteca de grafos utilizada, basta "make packages".
+    - A árvore possui profundidade 6.
+    - A estrutura está no arquivo "hds/fox_goose.h"
