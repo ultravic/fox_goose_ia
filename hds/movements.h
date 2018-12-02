@@ -1,14 +1,10 @@
 #ifndef __MOVEMENTS__
 #define __MOVEMENTS__
 
-#include <iostream>
-#include <vector>
-#include <map>
-#include <algorithm>
-#include <iterator>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <graphviz/cgraph.h>
-
-using namespace std;
 
 //=============================Constantes=====================================//
 // Estrutura para armazenar a cor e peso dos nodos.                           //

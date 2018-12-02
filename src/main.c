@@ -187,7 +187,6 @@ char* treeSearch(char board[MAXSTR], char players[2])
 //============================================================================//
 int main(int argc, char *argv[])
 {
-
 	char buf[MAXSTR];
     char tabuleiro[MAXSTR];
     char lado_meu;
